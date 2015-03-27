@@ -1,6 +1,6 @@
 \name{RAdwords}
 \alias{RAdwords}
-\title{Loading Google Adwords Data Into R}
+\title{Loading Google Adwords Data into R}
 \description{
     The aim of \strong{RAdwords} is loading Google Adwords data into R. Therefore the
     package implements three main features.\cr
@@ -25,6 +25,26 @@ Once the API projects for native application is set up, \code{\link{getAuth}} is
 \cr
 \strong{Receiving Data:}\cr
 \code{\link{getData}} queries the data from the Adwords API and transforms the data into an R dataframe.\cr
+}
+
+\examples{
+\dontrun{
+Authentication:
+google_auth <- doAuth()
+Create Statement:
+body <- statement(select=c('Clicks','AveragePosition','Cost','Ctr'),
+                  report="ACCOUNT_PERFORMANCE_REPORT",
+                  start="20140320",
+                  end="20140321")
+Query Adwords API and load data as dataframe:
+data <- getData(clientCustomerId='xxx-xxx-xxxx',
+                google_auth=google_auth,
+                statement=body)
+Get available report types:
+reports()
+Get available metrics/attributes of specific report type:
+metrics(report='ACCOUNT_PERFORMANCE_REPORT')
+}
 }
 
 \author{

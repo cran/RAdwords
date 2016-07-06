@@ -1,3 +1,38 @@
+RAdwords v0.1.10 (Release Date: 2016-07-05)
+----------------------------------------------------------------
+
+* Migration towards API version v201605. API versions v201605, v201603, v20161 and v201509 are selectable.
+
+RAdwords v0.1.9 (Release Date: 2016-04-22)
+----------------------------------------------------------------
+
+* Migration towards API version v201603. API versions v201603, v20161 and v201509 are selectable.
+* Sunset date of API version v201506 is deprecated and removed from the package.
+* New report available in v201603: top-content-performance-report.
+
+BUG FIXES
+
+* Transformation of raw data conflicting with variable of type double which contain "<" or ">". transformData() adjusted accordingly.
+
+
+RAdwords v0.1.8 (Release Date: 2016-02-19)
+----------------------------------------------------------------
+
+* Migration towards API version v201601. API versions v201601, v201509 and v201506 are selectable.
+* Sunset date of API version v201506 is April 11th 2016.
+
+Features:
+
+* statement(): both date formats are valid options: 20160101 or 2016-01-01
+* getData(): - checks is reportType is valid
+             - new function parameters: verbose and includeZeroImpressions
+
+RAdwords v0.1.7 (Release Date: 2015-11-13)
+----------------------------------------------------------------
+
+* Migration towards API version v201509. API versions v201509 and v201506 are selectable.
+* API version v201502 is deprecated since November 12th 2015 by Google.
+
 RAdwords v0.1.6 (Release Date: 2015-08-05)
 ----------------------------------------------------------------
 

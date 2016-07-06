@@ -5,7 +5,7 @@
 #' 
 #' @param data Raw csv data from Adwords API.
 #' @param report Report type.
-#' @param apiVersion set automatically by \code{\link{getData}}. Supported are 201506 or 201502. Default is 201506.
+#' @param apiVersion set automatically by \code{\link{getData}}. Supported are 201605, 201603 and 201601. Default is 201605.
 #' 
 #' @importFrom utils read.csv read.csv2
 #' @export
@@ -13,7 +13,7 @@
 #' @return Dataframe with the Adwords Data.
 transformData <- function(data,
                           report=reportType,
-                          apiVersion="201506"){
+                          apiVersion="201605"){
   # Transforms the csv into a dataframe. Moreover the variables are converted into suitable formats.
   #
   # Args:
@@ -31,14 +31,25 @@ transformData <- function(data,
   
   if(ncol(data)==1){
     variableName <- names(data)
-    data <- as.data.frame(data[2:(nrow(data)-1),1])
+    #eliminate row with total values
+    if(nrow(data)>0){
+      if(data[nrow(data), 1] == "Total"){
+          data <- as.data.frame(data[2:(nrow(data)-1),1])
+      } else {
+          data <- as.data.frame(data[2:nrow(data), 1])
+      }
+    }
     names(data) <- variableName
   }
   else if(ncol(data)>1) {
     #eliminate row with names
     data <- data[-1,]
     #eliminate row with total values
-    data <- data[-nrow(data),]
+    if(nrow(data)>0){
+      if(data[nrow(data), 1] == "Total"){
+        data <- data[-nrow(data), ]
+      }
+    }
   }
 
   #change data format of variables
@@ -46,19 +57,19 @@ transformData <- function(data,
     data$Day <- as.Date(data$Day)
   }
   #get metrics for requested report
-  if (apiVersion=="201506"){
-    report <- gsub('_','-',report)
-    report <- tolower(report)
-    reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201506/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
-  }
-  else if (apiVersion=="201502"){
-    report <- gsub('_','-',report)
-    report <- tolower(report)
-    reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201502/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
-  }
-  else if (apiVersion=="201409"){
-    reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201409/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
-  }
+  report <- gsub('_','-',report)
+  report <- tolower(report)
+  switch(apiVersion,
+         "201605" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201605/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
+         "201603" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201603/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
+         "201601" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201601/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
+         "201509" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201509/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
+  )
+#   else if (apiVersion=="201502"){
+#     report <- gsub('_','-',report)
+#     report <- tolower(report)
+#     reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201502/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
+#   }
   #transform factor into character
   i <- sapply(data, is.factor)
   data[i] <- lapply(data[i], as.character)
@@ -73,7 +84,7 @@ transformData <- function(data,
   #transform variable of type double which contain %
   for(var in doubleVar){
     if(var %in% colnames(data) && var %in% perVar){
-      data[,var] <- sub("%","",data[,var])
+      data[, var] <- gsub("%|<|>", "", data[, var])
       data[,var] <- as.numeric(data[,var])/100 
     }
   }
@@ -105,5 +116,5 @@ transformData <- function(data,
   }
   #eliminate " " spaces in column names
   names(data) <- gsub(" ","",names(data))
-  return(data)
+  data
 }

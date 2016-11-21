@@ -13,7 +13,7 @@
 #' @return Dataframe with the Adwords Data.
 transformData <- function(data,
                           report=reportType,
-                          apiVersion="201605"){
+                          apiVersion="201609"){
   # Transforms the csv into a dataframe. Moreover the variables are converted into suitable formats.
   #
   # Args:
@@ -60,10 +60,9 @@ transformData <- function(data,
   report <- gsub('_','-',report)
   report <- tolower(report)
   switch(apiVersion,
-         "201605" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201605/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
-         "201603" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201603/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
-         "201601" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201601/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
-         "201509" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201509/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
+         "201609" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201609/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
+         "201607" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201607/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8"),
+         "201605" = reportType <- read.csv(paste(system.file(package="RAdwords"),'/extdata/api201605/',report,'.csv',sep=''), sep = ',', encoding = "UTF-8")
   )
 #   else if (apiVersion=="201502"){
 #     report <- gsub('_','-',report)
@@ -100,7 +99,7 @@ transformData <- function(data,
   for(var in metricVar){
     if(var %in% colnames(data)){
       data[,var] <- as.character(data[,var])
-      data[,var] <- sub(',','',data[,var])
+      data[,var] <- gsub(',','',data[,var])#kill all commas
       data[,var] <- as.numeric(data[,var])
     }
   }

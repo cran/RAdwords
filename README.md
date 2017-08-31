@@ -1,4 +1,9 @@
-## Loading Google Adwords data into R ##
+RAdwords <img src="man/figures/RAdwords.png" align="right" />
+========================================================
+
+[![RAdwords Cran Release](https://www.r-pkg.org/badges/version-last-release/RAdwords)](https://cran.rstudio.com/web/packages/RAdwords/index.html) [![RAdwords Cran Downloads](https://cranlogs.r-pkg.org/badges/RAdwords)](https://cran.rstudio.com/web/packages/RAdwords/index.html)
+
+## Loading Google Adwords data into R
 
 **RAdwords** is a R package with the aim to load Adwords data into R. Therefore the package implements three main features.
 First, the package provides an **authentication process** for **R** with the **Adwords API** via OAUTH2.
@@ -7,7 +12,7 @@ Third, the received **data are transformed into suitable data formats** for furt
 
 ## Documentation
 
-We provide a detailed documentation here: [RAdwords Documentation](http://jburkhardt.github.io/RAdwords/)
+We provide a detailed documentation here: [RAdwords Documentation](https://jburkhardt.github.io/RAdwords/)
 
 ## Quickstart Guide
 

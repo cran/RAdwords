@@ -8,7 +8,7 @@
 #' @param clientCustomerId Adwords Account Id
 #' @param google_auth list of authentication
 #' @param statement awql statement generated with \code{\link{statement}}.
-#' @param apiVersion supports 201802, 201710 defaults to 201802.
+#' @param apiVersion supports 201806, 201802, 201710 defaults to 201806.
 #' @param transformation If TRUE, data will be transformed with \code{\link{transformData}} into suitable R dataframe.
 #' Else, the data are returned in raw format.
 #' @param includeZeroImpressions If TRUE zero impressions will be included. Defaults to FALSE.
@@ -19,7 +19,7 @@
 getData <- function(clientCustomerId,
                     google_auth,
                     statement,
-                    apiVersion = "201802",
+                    apiVersion = "201806",
                     transformation=TRUE,
                     changeNames=TRUE,
                     includeZeroImpressions=FALSE,
@@ -45,16 +45,43 @@ getData <- function(clientCustomerId,
   #   Dataframe with the Adwords Data.
   google.auth <- paste(access$token_type, access$access_token)
   #cert <- system.file("CurlSSL", "ca-bundle.crt", package = "RCurl")#SSL certification Fix for Windows
-  data <- RCurl::getURL(paste("https://adwords.google.com/api/adwords/reportdownload/v",apiVersion,sep=""),
-                        httpheader = c("Authorization" = google.auth,
-                                        "developerToken" = credlist$auth.developerToken,
-                                        "clientCustomerId" = clientCustomerId,
-                                       "includeZeroImpressions" = includeZeroImpressions),
-                 postfields=statement,
-                 verbose = verbose,
-  #               cainfo = cert, #add SSL certificate
-                 ssl.verifypeer = TRUE)
-  
+  # data <- RCurl::getURL(paste("https://adwords.google.com/api/adwords/reportdownload/v",apiVersion,sep=""),
+  #                       httpheader = c("Authorization" = google.auth,
+  #                                       "developerToken" = credlist$auth.developerToken,
+  #                                       "clientCustomerId" = clientCustomerId,
+  #                                      "includeZeroImpressions" = includeZeroImpressions),
+  #                postfields=statement,
+  #                verbose = verbose,
+  # #               cainfo = cert, #add SSL certificate
+  #                ssl.verifypeer = TRUE)
+  url <- paste("https://adwords.google.com/api/adwords/reportdownload/v",apiVersion,sep="")
+  header <- c("Authorization" = google.auth,
+              "developerToken" = credlist$auth.developerToken,
+              "clientCustomerId" = clientCustomerId,
+              "includeZeroImpressions" = includeZeroImpressions)
+  if(attributes(statement)$compressed){
+    data <- RCurl::getBinaryURL(url, 
+                                httpheader = header,
+                                postfields=statement,
+                                verbose = verbose,
+    #                           cainfo = cert, #add SSL certificate
+                                ssl.verifypeer = TRUE)
+    tmp <- tempfile()
+    if(.Platform$OS.type == "unix" && file.exists('/dev/shm') && file.info('/dev/shm')$isdir) {
+         tmp <- tempfile(tmpdir = '/dev/shm')
+        }
+        on.exit(unlink(tmp), add = TRUE)
+        writeBin(data, con=tmp)
+        data <- paste(readLines(con <- gzfile(tmp)), collapse = "\n")
+        close(con)
+  } else {
+    data <- RCurl::getURL(url, 
+                          httpheader = header,
+                          postfields=statement,
+                          verbose = verbose,
+    #                     cainfo = cert, #add SSL certificate
+                          ssl.verifypeer = TRUE)
+  }
   # check 
   valid <- grepl(attr(statement,"reportType"),data)
   

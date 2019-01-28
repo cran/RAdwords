@@ -10,6 +10,7 @@
 #' CONTAINS | CONTAINS_IGNORE_CASE | DOES_NOT_CONTAIN | DOES_NOT_CONTAIN_IGNORE_CASE
 #' @param start Beginning of date range. Format: 2018-01-01
 #' @param end End of date rage. Format: 2018-01-10
+#' @param apiVersion Adwords API Version, supports 201809, 201806, 201802 defaults to 201809.
 #' @param compress TRUE / FALSE, Gzipped data download if TRUE
 #' 
 #' @export
@@ -24,7 +25,7 @@
 #'                   where="Clicks > 100",
 #'                   start="2018-01-20",
 #'                   end="2018-01-21")    
-#' body <- statement(select=c('Clicks','AveragePosition','Cost','Ctr','ClickConversionRate'),
+#' body <- statement(select=c('Clicks','AveragePosition','Cost','Ctr'),
 #'                   report="ACCOUNT_PERFORMANCE_REPORT",
 #'                   start="2018-01-20",
 #'                   end="2018-01-21") 
@@ -39,7 +40,8 @@ statement <- function(select = c("AccountDescriptiveName",
                       where,
                       start = "2018-01-01",
                       end = "2018-01-10",
-                      compress = FALSE){  
+                      apiVersion = "201809",
+                      compress = TRUE){  
   # Generates and builds the Adwords Query Language Statement for querying the Adwords API.
   #
   # Args:
@@ -51,26 +53,47 @@ statement <- function(select = c("AccountDescriptiveName",
   #                       CONTAINS | CONTAINS_IGNORE_CASE | DOES_NOT_CONTAIN | DOES_NOT_CONTAIN_IGNORE_CASE
   #   start:  Start date
   #   end:    End date
+  #   apiVersion. Adwords API version 201809
   #   compress: TRUE / FALSE, Gzipped data download if TRUE
   #
   # Returns:
   #   The statement for the RCurl post.
+  
+  # check reports ---------------------------------------------------------------------------
+  reports <- reports(apiVersion = apiVersion) # loads available reports
+  report <- toupper(report) # Adwords API only accepts upper case report names
+  report <- gsub(" ", "_", report) # Adwords API does not accept whitespace in report names
+  if(!(report %in% reports)){ # checks if report is in valid set of available reports
+    stop(sprintf("%s is not a valid report. List all valid reports with: reports()", report))
+  }
+  # check metrics ---------------------------------------------------------------------------
+  metrics <- metrics(report = report, apiVersion = apiVersion) # loads available metrics
+  if(FALSE %in% (select %in% metrics)){ # checks if all metric parameter are in valid set of metrics
+    position <- match(FALSE, select %in% metrics) # determines position of false metric in select vector
+    stop(sprintf('%s is not a valid metric. List all valid metrics with metrics(report = "%s")', select[position], report))
+  }
+  # convert date input parameter
   start <- gsub("-", "", start)
   end <- gsub("-", "", end)
   selectA <- paste(select, collapse = ",")
   fmt <- if(compress) "GZIPPED_CSV" else "CSV"
   if(missing(where)){
     body <- sprintf("__rdquery=SELECT+%s+FROM+%s+DURING+%s,%s&__fmt=%s",selectA,report,start,end,fmt)
-  }
-  if(!missing(where)){
+  } else {
     body <- sprintf("__rdquery=SELECT+%s+FROM+%s+WHERE+%s+DURING+%s,%s&__fmt=%s",selectA,report,where,start,end,fmt)
   }
-  if(report == "LABEL_REPORT"){
+  # reports without statistics and date column
+  if(report %in% c("LABEL_REPORT",
+                   "CAMPAIGN_NEGATIVE_KEYWORDS_PERFORMANCE_REPORT",
+                   "CAMPAIGN_NEGATIVE_LOCATIONS_REPORT",
+                   "CAMPAIGN_NEGATIVE_PLACEMENTS_PERFORMANCE_REPORT")){
     body <- sprintf("__rdquery=SELECT+%s+FROM+%s&__fmt=%s",selectA,report,fmt)
-    print("The Adwords API does not support date ranges in the Label Report. Thus, date ranges will be ignored in the Label Report")
+    print(sprintf("The Adwords API does not support date ranges in the %s. Thus, date ranges will be ignored.", report))
   }
-  # attach report Type and compression as attributes of body
+  # attach report Type, compression and apiVersion as attributes of body
   attr(body,"reportType") <- report
   attr(body,"compressed") <- compress
-  return(body)
+  attr(body,"apiVersion") <- apiVersion
+  # return
+  body
 }

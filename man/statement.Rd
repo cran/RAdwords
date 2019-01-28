@@ -6,7 +6,8 @@
 \usage{
 statement(select = c("AccountDescriptiveName", "AccountId", "Impressions",
   "Clicks", "Cost", "Date"), report = "ACCOUNT_PERFORMANCE_REPORT", where,
-  start = "2018-01-01", end = "2018-01-10", compress = FALSE)
+  start = "2018-01-01", end = "2018-01-10", apiVersion = "201809",
+  compress = TRUE)
 }
 \arguments{
 \item{select}{Attributes}
@@ -21,6 +22,8 @@ CONTAINS | CONTAINS_IGNORE_CASE | DOES_NOT_CONTAIN | DOES_NOT_CONTAIN_IGNORE_CAS
 \item{start}{Beginning of date range. Format: 2018-01-01}
 
 \item{end}{End of date rage. Format: 2018-01-10}
+
+\item{apiVersion}{Adwords API Version, supports 201809, 201806, 201802 defaults to 201809.}
 
 \item{compress}{TRUE / FALSE, Gzipped data download if TRUE}
 }
@@ -41,7 +44,7 @@ body <- statement(select=c('Criteria','Clicks','Cost','Ctr'),
                   where="Clicks > 100",
                   start="2018-01-20",
                   end="2018-01-21")    
-body <- statement(select=c('Clicks','AveragePosition','Cost','Ctr','ClickConversionRate'),
+body <- statement(select=c('Clicks','AveragePosition','Cost','Ctr'),
                   report="ACCOUNT_PERFORMANCE_REPORT",
                   start="2018-01-20",
                   end="2018-01-21") 
